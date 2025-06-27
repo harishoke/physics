@@ -1,17 +1,16 @@
-
 <!DOCTYPE html>
 <html lang="si">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>නිව්ටන්ගේ සිසිලන නියමය - 3D අනුරුව (වේගවත් කරන ලදී)</title>
+    <title>නිව්ටන්ගේ සිසිලන නියමය - වැඩිදියුණු කළ අනුරුව</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             font-family: 'Inter', 'Iskoola Pota', sans-serif;
             background-color: #1a202c;
             color: #e2e8f0;
-            overflow: hidden; /* Prevent scrollbars from appearing */
+            overflow: hidden;
         }
         #simulation-container {
             width: 100vw;
@@ -19,63 +18,69 @@
             position: fixed;
             top: 0;
             left: 0;
+            z-index: 0;
         }
         .ui-panel {
-            background-color: rgba(45, 55, 72, 0.85);
+            background-color: rgba(45, 55, 72, 0.9);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
         }
         .btn {
             transition: all 0.3s ease;
+            cursor: pointer;
         }
-        .btn:hover {
+        .btn:disabled {
+            background-color: #4a5568;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
         }
-        .data-table table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .data-table th, .data-table td {
-            padding: 8px 12px;
-            border: 1px solid #4a5568;
-            text-align: center;
-        }
-        .data-table th {
-            background-color: #4a5568;
-        }
-        .data-table tbody tr:nth-child(even) {
-            background-color: #2d3748;
-        }
-        #data-log {
-            max-height: 150px;
-            overflow-y: auto;
-        }
-         /* Custom scrollbar for data log */
-        #data-log::-webkit-scrollbar {
-            width: 8px;
-        }
-        #data-log::-webkit-scrollbar-track {
-            background: #2d3748;
-            border-radius: 10px;
-        }
-        #data-log::-webkit-scrollbar-thumb {
-            background-color: #4a5568;
-            border-radius: 10px;
-            border: 2px solid #2d3748;
-        }
+        .data-table table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 8px 12px; border: 1px solid #4a5568; text-align: center; }
+        .data-table th { background-color: #4a5568; }
+        .data-table tbody tr:nth-child(even) { background-color: #2d3748; }
+        #data-log { max-height: 150px; overflow-y: auto; }
+        #data-log::-webkit-scrollbar { width: 8px; }
+        #data-log::-webkit-scrollbar-track { background: #2d3748; border-radius: 10px; }
+        #data-log::-webkit-scrollbar-thumb { background-color: #4a5568; border-radius: 10px; border: 2px solid #2d3748; }
+        #guidance-panel ul { list-style-position: inside; padding-left: 1rem; }
+        #guidance-panel li { margin-bottom: 0.5rem; }
     </style>
 </head>
 <body class="m-0 p-0">
 
     <div id="simulation-container"></div>
 
+    <div id="guidance-panel" class="absolute inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-20">
+        <div class="ui-panel rounded-lg p-8 shadow-2xl max-w-2xl w-full text-center">
+            <h1 class="text-2xl font-bold mb-4 text-cyan-300">නිව්ටන්ගේ සිසිලන නියමය වෙත සාදරයෙන් පිළිගනිමු</h1>
+            <p class="mb-4 text-gray-300">මෙම පරීක්ෂණයේ අරමුණ, වස්තුවක සිසිලන ශීඝ්‍රතාවය, එම වස්තුවේ සහ පරිසරයේ උෂ්ණත්ව අන්තරයට අනුලෝමව සමානුපාතික වන බව පෙන්වීමයි. ($\frac{d\theta}{dt} \propto (\theta - \theta_0)$)</p>
+            <h2 class="text-lg font-semibold mb-2 text-yellow-300">අනුගමනය කළ යුතු පියවර:</h2>
+            <ul class="text-left mb-6 text-gray-300">
+                <li><span class="font-bold">1. රත් කිරීම:</span> 'ජලය රත් කරන්න' බොත්තම ඔබා ජලය 85°C දක්වා රත් වන තෙක් රැඳී සිටින්න.</li>
+                <li><span class="font-bold">2. සිසිලනය ඇරඹීම:</span> 'සිසිලනය අරඹන්න' බොත්තම ඔබන්න. කාල ගණකය ක්‍රියාත්මක වේ.</li>
+                <li><span class="font-bold">3. දත්ත සටහන් කිරීම:</span> සෑම තත්පර 30කට වරක්, 'අගය සටහන් කරන්න' බොත්තම ඔබා උෂ්ණත්වය සටහන් කරගන්න. උෂ්ණත්වය මැනීමට පෙර 'කලතන්න' බොත්තම ඔබා ජලය මිශ්‍ර කරන්න.</li>
+                <li><span class="font-bold">4. විශ්ලේෂණය:</span> ප්‍රමාණවත් දත්ත ලබාගත් පසු, 'ගණනය කරන්න' බොත්තම ඔබා $\theta-\theta_0$ සහ $\ln(\theta-\theta_0)$ අගයන් ලබාගන්න. ඉන්පසු ප්‍රස්තාර විශ්ලේෂණය කරන්න.</li>
+            </ul>
+            <button id="start-guidance-btn" class="btn bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-lg text-lg">පරීක්ෂණය අරඹමු</button>
+        </div>
+    </div>
+
+
     <div class="absolute top-4 left-4 ui-panel rounded-lg p-4 shadow-2xl max-w-sm w-full z-10">
         <h1 class="text-xl font-bold mb-3 text-center text-cyan-300">පාලක පුවරුව</h1>
-        <div class="flex space-x-2 mb-4">
-            <button id="heat-btn" class="btn bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-lg w-1/2">ජලය රත් කරන්න</button>
-            <button id="start-btn" class="btn bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-lg w-1/2" disabled>පරීක්ෂණය අරඹන්න</button>
+        
+        <div class="grid grid-cols-2 gap-2 mb-4">
+            <button id="heat-btn" class="btn bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-lg">ජලය රත් කරන්න</button>
+            <button id="start-cooling-btn" class="btn bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-lg" disabled>සිසිලනය අරඹන්න</button>
+            <button id="stir-btn" class="btn bg-teal-500 hover:bg-teal-400 text-white font-bold py-2 px-4 rounded-lg" disabled>කලතන්න</button>
+            <button id="record-btn" class="btn bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-2 px-4 rounded-lg" disabled>අගය සටහන් කරන්න</button>
         </div>
+
         <button id="reset-btn" class="btn bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg w-full mb-4">නැවත සකසන්න</button>
         
         <div class="grid grid-cols-2 gap-4 text-center">
@@ -92,15 +97,14 @@
                 <p id="ambient-temp-display" class="text-lg font-mono">27.0</p>
             </div>
         </div>
-        <div class="mt-2 text-center text-xs text-gray-400">
-            <p>කැමරාව පාලනයට මවුසය භාවිතා කරන්න. (Click & Drag, Scroll)</p>
-        </div>
     </div>
 
     <div class="absolute bottom-4 left-4 right-4 flex space-x-4 z-10">
-        <!-- Data Table Panel -->
         <div class="ui-panel rounded-lg p-4 shadow-2xl flex-1 data-table">
-            <h2 class="text-lg font-bold mb-2 text-center text-cyan-300">දත්ත වගුව</h2>
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-lg font-bold text-cyan-300">දත්ත වගුව</h2>
+                <button id="calculate-btn" class="btn bg-yellow-600 hover:bg-yellow-500 text-black font-bold py-1 px-3 rounded-lg text-sm" disabled>ගණනය කරන්න</button>
+            </div>
             <div id="data-log" class="text-sm">
                 <table>
                     <thead>
@@ -111,14 +115,11 @@
                             <th>ln(θ - θ₀)</th>
                         </tr>
                     </thead>
-                    <tbody id="data-table-body">
-                        <!-- Data will be inserted here -->
-                    </tbody>
+                    <tbody id="data-table-body"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Graph Panel -->
         <div class="ui-panel rounded-lg p-4 shadow-2xl flex-1">
              <h2 class="text-lg font-bold mb-2 text-center text-cyan-300">ප්‍රස්ථාර</h2>
             <select id="graph-selector" class="bg-gray-700 text-white p-2 rounded-md mb-2 w-full">
@@ -131,12 +132,7 @@
     
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
     <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
-      }
-    }
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/" } }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -144,135 +140,108 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // --- Global Variables & State ---
-        let scene, camera, renderer, controls;
-        let clock = new THREE.Clock();
-        let chart;
-
-        // Models
-        let calorimeter, stirrer, thermometerLiquid, enclosure, beaker, burner, flame;
+        let scene, camera, renderer, controls, clock, chart;
+        let calorimeter, stirrer, thermometerLiquid, flame, lid;
         
-        // Experiment State
-        let temperature = 27.0;
-        const ambientTemperature = 27.0;
-        const coolingConstant = 0.002;
-        let time = 0;
-        let isExperimentRunning = false;
-        let isHeated = false;
-        let dataPoints = [];
-        let initialTemp = 85.0;
+        // MODIFIED: State management
+        const STATE = {
+            temperature: 27.0,
+            ambientTemperature: 27.0,
+            coolingConstant: 0.002,
+            time: 0,
+            initialTemp: 85.0,
+            isHeated: false,
+            isCooling: false,
+            isStirring: false,
+            stirringTime: 0,
+            dataPoints: [],
+        };
 
         // UI Elements
         const timeDisplay = document.getElementById('time-display');
         const tempDisplay = document.getElementById('temp-display');
         const ambientTempDisplay = document.getElementById('ambient-temp-display');
         const heatBtn = document.getElementById('heat-btn');
-        const startBtn = document.getElementById('start-btn');
+        const startCoolingBtn = document.getElementById('start-cooling-btn');
+        const stirBtn = document.getElementById('stir-btn');
+        const recordBtn = document.getElementById('record-btn');
         const resetBtn = document.getElementById('reset-btn');
+        const calculateBtn = document.getElementById('calculate-btn');
         const dataTableBody = document.getElementById('data-table-body');
         const graphSelector = document.getElementById('graph-selector');
+        const guidancePanel = document.getElementById('guidance-panel');
+        const startGuidanceBtn = document.getElementById('start-guidance-btn');
 
-        // --- Initialization ---
         function init() {
-            // Scene setup
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x1a202c);
+            clock = new THREE.Clock();
 
-            // Camera setup
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
             camera.position.set(5, 4, 8);
             
-            // Renderer setup
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            // OPTIMIZATION: Cap pixel ratio for performance on high-DPI screens
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-            // OPTIMIZATION: Shadows are disabled for performance
-            // renderer.shadowMap.enabled = true; 
             document.getElementById('simulation-container').appendChild(renderer.domElement);
 
-            // Controls
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
-            controls.maxDistance = 30;
-            controls.minDistance = 2;
             controls.maxPolarAngle = Math.PI / 1.8;
 
-            // Lighting
             const ambientLight = new THREE.AmbientLight(0xcccccc, 0.8);
-            scene.add(ambientLight);
-
             const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
             directionalLight.position.set(-7, 10, 8);
-            // OPTIMIZATION: Shadows are disabled for performance
-            // directionalLight.castShadow = true; 
-            scene.add(directionalLight);
+            scene.add(ambientLight, directionalLight);
             
-            // Create Lab Environment
             createLabModels();
             createChart();
             setupEventListeners();
             
-            ambientTempDisplay.textContent = ambientTemperature.toFixed(1);
-
+            ambientTempDisplay.textContent = STATE.ambientTemperature.toFixed(1);
+            updateThermometer();
             animate();
         }
 
-        // --- Create 3D Models ---
         function createLabModels() {
-            // OPTIMIZATION: Reduced segment count for geometries
-            const segments = 16; 
-            
-            // Materials
+            const segments = 16;
             const shinyMetal = new THREE.MeshStandardMaterial({ color: 0xb0c4de, metalness: 0.8, roughness: 0.2 });
             const glass = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.1, roughness: 0.1, transparent: true, opacity: 0.3 });
             const waterMaterial = new THREE.MeshStandardMaterial({ color: 0x63b3ed, metalness: 0.2, roughness: 0.3, transparent: true, opacity: 0.7 });
             const cork = new THREE.MeshStandardMaterial({ color: 0x966F33, roughness: 0.8 });
             const tableMaterial = new THREE.MeshStandardMaterial({ color: 0x3c3c3c, roughness: 0.7 });
             
-            // Table
             const table = new THREE.Mesh(new THREE.BoxGeometry(25, 0.2, 15), tableMaterial);
             table.position.y = -0.1;
-            // table.receiveShadow = true;
             scene.add(table);
             
-            // Enclosure
-            const enclosureGeo = new THREE.CylinderGeometry(1.2, 1.2, 2.5, segments);
-            enclosure = new THREE.Mesh(enclosureGeo, new THREE.MeshStandardMaterial({ color: 0x4a5568, side: THREE.DoubleSide }));
+            const enclosure = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 2.5, segments), new THREE.MeshStandardMaterial({ color: 0x4a5568, side: THREE.DoubleSide }));
             enclosure.position.y = 1.25;
             scene.add(enclosure);
 
-            // Calorimeter
-            const calorimeterGeo = new THREE.CylinderGeometry(0.8, 0.75, 2, segments);
-            calorimeter = new THREE.Mesh(calorimeterGeo, shinyMetal);
+            calorimeter = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.75, 2, segments), shinyMetal);
             calorimeter.position.y = 1;
             scene.add(calorimeter);
 
-            // Water inside calorimeter
-            const waterGeo = new THREE.CylinderGeometry(0.78, 0.73, 1.5, segments);
-            const water = new THREE.Mesh(waterGeo, waterMaterial);
+            const water = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.73, 1.5, segments), waterMaterial);
             water.position.y = 0.75;
             calorimeter.add(water);
 
-            // Lid
-            const lidGeo = new THREE.CylinderGeometry(0.85, 0.85, 0.1, segments);
-            const lid = new THREE.Mesh(lidGeo, cork);
+            // MODIFIED: Lid is now a separate object
+            lid = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 0.1, segments), cork);
             lid.position.y = 2.05;
+            lid.visible = false; // Initially hidden
             scene.add(lid);
             
-            // Stirrer
             const stirrerRod = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 2.2, 8), shinyMetal);
             const stirrerRing = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.02, 8, segments), shinyMetal);
             stirrerRod.position.y = 1.1;
             stirrerRing.rotation.x = Math.PI / 2;
             stirrer = new THREE.Group();
             stirrer.add(stirrerRod, stirrerRing);
-            stirrer.position.y = 1.0;
-            stirrer.position.x = 0.3;
+            stirrer.position.set(0.3, 1.0, 0);
             scene.add(stirrer);
 
-            // Thermometer
             const thermometer = new THREE.Group();
             const thermometerCase = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.5, 8), glass);
             const thermometerBulb = new THREE.Mesh(new THREE.SphereGeometry(0.15, segments / 2, segments / 2), glass);
@@ -281,122 +250,70 @@
             thermometer.add(thermometerCase, thermometerBulb, thermometerLiquid);
             thermometer.position.set(-0.3, 2.2, 0);
             scene.add(thermometer);
-            updateThermometer();
             
-            // Burner Setup
+            // Burner setup (for visuals)
             const burnerBase = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.2, segments), shinyMetal);
-            burnerBase.position.y = 0.1;
             const burnerTube = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1, segments), shinyMetal);
+            const burner = new THREE.Group().add(burnerBase, burnerTube);
+            burnerBase.position.y = 0.1;
             burnerTube.position.y = 0.7;
-            
-            const tripodLeg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5, 8), tableMaterial);
-            tripodLeg1.position.set(0.6, 0.75, 0);
-            tripodLeg1.rotation.z = 0.3;
-            const tripodLeg2 = tripodLeg1.clone();
-            tripodLeg2.rotation.z = -0.3;
-            tripodLeg2.position.x = -0.6;
-            const tripodLeg3 = tripodLeg1.clone();
-            tripodLeg3.position.set(0, 0.75, 0.8);
-            tripodLeg3.rotation.x = -0.3;
-            tripodLeg3.rotation.z = 0;
-            const tripodTop = new THREE.Mesh(new THREE.TorusGeometry(0.8, 0.05, 8, segments), tableMaterial);
-            tripodTop.position.y = 1.5;
-            tripodTop.rotation.x = Math.PI / 2;
-
-            const tripod = new THREE.Group();
-            tripod.add(tripodLeg1, tripodLeg2, tripodLeg3, tripodTop);
-            tripod.position.set(3.5, 0, 0);
-
-            beaker = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 1.5, segments, 1, true), glass);
-            beaker.position.set(3.5, 1.5 + 0.75, 0);
-            
-            burner = new THREE.Group();
-            burner.add(burnerBase, burnerTube);
             burner.position.set(3.5, 0, 0);
-            
             flame = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.5, segments), new THREE.MeshBasicMaterial({ color: 0xffa500, transparent: true, opacity: 0.8 }));
             flame.position.y = 1.3;
-            burner.add(flame);
             flame.visible = false;
-            
-            scene.add(beaker, burner, tripod);
+            burner.add(flame);
+            scene.add(burner);
         }
 
         function updateThermometer() {
             const minTemp = 20, maxTemp = 90;
             const minHeight = 0.1, maxHeight = 2.2;
-            const normalizedTemp = (temperature - minTemp) / (maxTemp - minTemp);
+            const normalizedTemp = (STATE.temperature - minTemp) / (maxTemp - minTemp);
             const height = minHeight + normalizedTemp * (maxHeight - minHeight);
             
             thermometerLiquid.scale.y = height;
             thermometerLiquid.position.y = -1.25 + height / 2;
-            tempDisplay.textContent = temperature.toFixed(1);
+            tempDisplay.textContent = STATE.temperature.toFixed(1);
         }
 
-        // --- Chart ---
         function createChart() {
             const ctx = document.getElementById('cooling-chart').getContext('2d');
             chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'උෂ්ණත්වය (°C)',
-                        data: [],
-                        borderColor: '#38b2ac',
-                        backgroundColor: 'rgba(56, 178, 172, 0.2)',
-                        borderWidth: 2,
-                        pointRadius: 2,
-                        fill: true,
-                        tension: 0.1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 0 // OPTIMIZATION: Disable chart animation for snappier updates
-                    },
+                type: 'line', data: { labels: [], datasets: [{ label: 'උෂ්ණත්වය (°C)', data: [], borderColor: '#38b2ac', backgroundColor: 'rgba(56, 178, 172, 0.2)', borderWidth: 2, pointRadius: 3, fill: true, tension: 0.1 }] },
+                options: { responsive: true, maintainAspectRatio: false, animation: { duration: 0 },
                     scales: {
-                        x: {
-                            type: 'linear',
-                            title: { display: true, text: 'කාලය (s)', color: '#a0aec0' },
-                            ticks: { color: '#a0aec0' }
-                        },
-                        y: {
-                            title: { display: true, text: 'උෂ්ණත්වය (°C)', color: '#a0aec0' },
-                            ticks: { color: '#a0aec0' }
-                        }
+                        x: { type: 'linear', title: { display: true, text: 'කාලය (s)', color: '#a0aec0' }, ticks: { color: '#a0aec0' } },
+                        y: { title: { display: true, text: 'උෂ්ණත්වය (°C)', color: '#a0aec0' }, ticks: { color: '#a0aec0' } }
                     },
-                    plugins: {
-                        legend: { labels: { color: '#e2e8f0' } }
-                    }
+                    plugins: { legend: { labels: { color: '#e2e8f0' } } }
                 }
             });
         }
         
         function updateChart() {
             const type = graphSelector.value;
-            chart.data.labels = dataPoints.map(p => p.time.toFixed(1));
-            
+            chart.data.labels = STATE.dataPoints.map(p => p.time.toFixed(1));
             if (type === 'temp-time') {
-                chart.data.datasets[0].data = dataPoints.map(p => p.temp);
+                chart.data.datasets[0].data = STATE.dataPoints.map(p => p.temp);
                 chart.data.datasets[0].label = 'උෂ්ණත්වය (°C)';
                 chart.options.scales.y.title.text = 'උෂ්ණත්වය (°C)';
             } else { 
-                chart.data.datasets[0].data = dataPoints.map(p => p.ln_diff);
+                const lnData = STATE.dataPoints.map(p => p.ln_diff).filter(val => val !== null);
+                chart.data.datasets[0].data = lnData;
                 chart.data.datasets[0].label = 'ln(θ - θ₀)';
                 chart.options.scales.y.title.text = 'ln(θ - θ₀)';
             }
-            
             chart.update();
         }
 
-        // --- Event Listeners ---
         function setupEventListeners() {
             window.addEventListener('resize', onWindowResize, false);
+            startGuidanceBtn.addEventListener('click', () => { guidancePanel.style.display = 'none'; });
             heatBtn.addEventListener('click', heatWater);
-            startBtn.addEventListener('click', startCooling);
+            startCoolingBtn.addEventListener('click', startCooling);
+            stirBtn.addEventListener('click', stirWater);
+            recordBtn.addEventListener('click', logDataPoint);
+            calculateBtn.addEventListener('click', calculateDerivedData);
             resetBtn.addEventListener('click', resetSimulation);
             graphSelector.addEventListener('change', updateChart);
         }
@@ -406,124 +323,147 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
-
-        // --- Simulation Logic ---
+        
         function heatWater() {
-            if (isHeated) return;
-            isHeated = true;
+            if (STATE.isHeated) return;
+            STATE.isHeated = true;
             flame.visible = true;
             heatBtn.disabled = true;
-            heatBtn.textContent = 'රත් වෙමින් පවතී...';
+            heatBtn.textContent = 'රත් වෙමින්...';
             
-            let heatTime = 0;
-            const heatDuration = 3;
+            let heatTime = 0; const heatDuration = 3;
             const heatInterval = setInterval(() => {
                 heatTime += 0.1;
-                temperature = ambientTemperature + (initialTemp - ambientTemperature) * (heatTime / heatDuration);
+                STATE.temperature = STATE.ambientTemperature + (STATE.initialTemp - STATE.ambientTemperature) * (heatTime / heatDuration);
                 updateThermometer();
                 if (heatTime >= heatDuration) {
                     clearInterval(heatInterval);
                     flame.visible = false;
-                    temperature = initialTemp;
+                    STATE.temperature = STATE.initialTemp;
                     updateThermometer();
-                    startBtn.disabled = false;
-                    heatBtn.textContent = 'ජලය රත් වී ඇත';
+                    heatBtn.textContent = 'රත් වී ඇත';
+                    startCoolingBtn.disabled = false;
+                    lid.visible = true; // Show the lid
                 }
             }, 100);
         }
 
+        // NEW: Stirring function
+        function stirWater() {
+            if (STATE.isStirring) return;
+            STATE.isStirring = true;
+            stirBtn.disabled = true;
+            setTimeout(() => { 
+                STATE.isStirring = false;
+                if(STATE.isCooling) stirBtn.disabled = false;
+            }, 2000); // Stir for 2 seconds
+        }
+
         function startCooling() {
-            if (isExperimentRunning || !isHeated) return;
-            isExperimentRunning = true;
-            startBtn.disabled = true;
-            startBtn.textContent = 'සිසිල් වෙමින් පවතී';
-            time = 0;
-            dataPoints = [];
-            dataTableBody.innerHTML = '';
-            logDataPoint();
+            if (STATE.isCooling || !STATE.isHeated) return;
+            STATE.isCooling = true;
+            startCoolingBtn.disabled = true;
+            recordBtn.disabled = false;
+            stirBtn.disabled = false;
+            calculateBtn.disabled = false;
+            logDataPoint(); // Log the initial t=0 reading
+        }
+
+        // MODIFIED: Manual data logging
+        function logDataPoint() {
+            if (!STATE.isCooling) return;
+            if (STATE.temperature <= STATE.ambientTemperature + 1) { 
+                STATE.isCooling = false;
+                recordBtn.disabled = true;
+                stirBtn.disabled = true;
+                recordBtn.textContent = 'අවසන්';
+                return;
+            }
+
+            STATE.dataPoints.push({ time: STATE.time, temp: STATE.temperature, temp_diff: null, ln_diff: null });
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${STATE.time.toFixed(1)}</td>
+                <td>${STATE.temperature.toFixed(2)}</td>
+                <td class="derived-data">---</td>
+                <td class="derived-data">---</td>
+            `;
+            dataTableBody.appendChild(row);
+            document.getElementById('data-log').scrollTop = document.getElementById('data-log').scrollHeight;
+            updateChart();
+        }
+        
+        // NEW: Calculate derived data
+        function calculateDerivedData() {
+            const rows = dataTableBody.querySelectorAll('tr');
+            STATE.dataPoints.forEach((point, index) => {
+                const tempDiff = point.temp - STATE.ambientTemperature;
+                const lnDiff = tempDiff > 0 ? Math.log(tempDiff) : 0;
+                point.temp_diff = tempDiff;
+                point.ln_diff = lnDiff;
+
+                if (rows[index]) {
+                    rows[index].children[2].textContent = tempDiff.toFixed(2);
+                    rows[index].children[3].textContent = lnDiff.toFixed(3);
+                }
+            });
+            updateChart(); // Update chart with newly calculated data
+            calculateBtn.disabled = true;
         }
 
         function resetSimulation() {
-            isExperimentRunning = false;
-            isHeated = false;
-            time = 0;
-            temperature = ambientTemperature;
-            dataPoints = [];
+            STATE.isCooling = false;
+            STATE.isHeated = false;
+            STATE.time = 0;
+            STATE.temperature = STATE.ambientTemperature;
+            STATE.dataPoints = [];
+            
             updateThermometer();
             chart.data.labels = [];
             chart.data.datasets[0].data = [];
             chart.update();
             dataTableBody.innerHTML = '';
             timeDisplay.textContent = '0.0';
+            
             heatBtn.disabled = false;
-            startBtn.disabled = true;
             heatBtn.textContent = 'ජලය රත් කරන්න';
-            startBtn.textContent = 'පරීක්ෂණය අරඹන්න';
+            startCoolingBtn.disabled = true;
+            recordBtn.disabled = true;
+            recordBtn.textContent = 'අගය සටහන් කරන්න';
+            stirBtn.disabled = true;
+            calculateBtn.disabled = true;
+
+            lid.visible = false;
+            guidancePanel.style.display = 'flex';
         }
 
-        function logDataPoint() {
-            if (temperature <= ambientTemperature + 1) { 
-                if(isExperimentRunning) {
-                   isExperimentRunning = false;
-                   startBtn.textContent = 'පරීක්ෂණය අවසන්';
-                }
-                return;
-            }
-
-            const tempDiff = temperature - ambientTemperature;
-            const lnDiff = tempDiff > 0 ? Math.log(tempDiff) : 0;
-            const currentTime = isExperimentRunning ? time : 0;
-            dataPoints.push({ time: currentTime, temp: temperature, ln_diff: lnDiff });
-
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${currentTime.toFixed(1)}</td>
-                <td>${temperature.toFixed(2)}</td>
-                <td>${tempDiff.toFixed(2)}</td>
-                <td>${lnDiff.toFixed(3)}</td>
-            `;
-            dataTableBody.appendChild(row);
-            document.getElementById('data-log').scrollTop = document.getElementById('data-log').scrollHeight;
-
-            updateChart();
-        }
-
-        // --- Animation Loop ---
         function animate() {
             requestAnimationFrame(animate);
             const delta = clock.getDelta();
 
-            if (isExperimentRunning) {
-                const previousTime = Math.floor(time);
-                time += delta;
-                const tempDifference = temperature - ambientTemperature;
-                const coolingRate = coolingConstant * tempDifference;
-                temperature -= coolingRate * delta * 20;
+            if (STATE.isCooling) {
+                STATE.time += delta;
+                const tempDifference = STATE.temperature - STATE.ambientTemperature;
+                const coolingRate = STATE.coolingConstant * tempDifference;
+                // Slow down simulation speed for more realistic timing
+                STATE.temperature -= coolingRate * delta * 5; 
 
-                if (Math.floor(time) > previousTime) {
-                    logDataPoint();
-                }
-
-                timeDisplay.textContent = time.toFixed(1);
+                timeDisplay.textContent = STATE.time.toFixed(1);
                 updateThermometer();
             }
 
-            if (stirrer) {
-                 stirrer.rotation.y += delta * 0.5;
+            if (STATE.isStirring) {
+                 stirrer.rotation.y += delta * 5; // Faster rotation when stirring
+            } else {
+                 stirrer.rotation.y += delta * 0.2; // Slow default rotation
             }
 
             controls.update();
             renderer.render(scene, camera);
         }
-
-        // --- Start ---
-        try {
-            init();
-        } catch (e) {
-            console.error("An error occurred during initialization:", e);
-            const container = document.getElementById('simulation-container');
-            container.innerHTML = `<div class="w-full h-full flex items-center justify-center text-red-400 p-8"><p>Simulation failed to load. Please check the browser console (F12) for errors.</p></div>`;
-        }
+        
+        try { init(); } catch (e) { console.error(e); }
     </script>
 
 </body>
